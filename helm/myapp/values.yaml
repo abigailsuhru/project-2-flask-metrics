@@ -1,0 +1,29 @@
+image:
+  repository: "REPLACE_WITH_ECR_REPO" # e.g. 123456789012.dkr.ecr.eu-west-1.amazonaws.com/devops-project-2-app
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 60
+
+prometheus:
+  servicemonitor:
+    enabled: true
+    interval: 30s
