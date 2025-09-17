@@ -3,7 +3,7 @@
 export TF_VAR_github_owner="YOUR_GITHUB_OWNER"
 export TF_VAR_github_repo="YOUR_REPO_NAME"
 # Optionally choose a region
-# export TF_VAR_region="eu-west-1"
+# export TF_VAR_region="eu-central-1"
 
 terraform init
 terraform apply -auto-approve
