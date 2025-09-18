@@ -1,5 +1,5 @@
 resource "aws_ecr_repository" "app" {
-  name = "devops-project-2-app"
+  name = "${var.project_name}-app"
 
   lifecycle {
     prevent_destroy = true
@@ -9,6 +9,9 @@ resource "aws_ecr_repository" "app" {
   {
      scan_on_push = true
   }
-  image_tag_mutability = "MUTABLE"
+
+ image_tag_mutability {
+   mutation = "MUTABLE"
+ }
 
 }
