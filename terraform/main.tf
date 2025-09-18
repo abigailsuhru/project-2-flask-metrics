@@ -119,7 +119,7 @@ resource "aws_iam_role_policy_attachment" "gha_attach" {
 # Map the IAM role into Kubernetes admins so helm/kubectl can deploy
 module "eks_blueprints_addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
-  version = "1.17.0" # check latest on Terraform Registry
+  version = "~> 1.16.0" # check latest on Terraform Registry
 
   cluster_name        = module.eks.cluster_name
   cluster_endpoint    = module.eks.cluster_endpoint
