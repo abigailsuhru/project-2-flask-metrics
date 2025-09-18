@@ -119,21 +119,14 @@ resource "aws_iam_role_policy_attachment" "gha_attach" {
 # Map the IAM role into Kubernetes admins so helm/kubectl can deploy
 module "eks_blueprints_addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
-  version = "~> 1.16"
+  version = "1.17.0" # check latest on Terraform Registry
 
-  cluster_name      = module.eks.cluster_name
-  cluster_endpoint  = module.eks.cluster_endpoint
-  cluster_ca_data   = module.eks.cluster_certificate_authority_data
+  cluster_name        = module.eks.cluster_name
+  cluster_endpoint    = module.eks.cluster_endpoint
+  cluster_version     = module.eks.cluster_version
+  oidc_provider_arn   = module.eks.oidc_provider_arn
 
-  enable_aws_load_balancer_controller = true
-
-  # Map GitHub Actions role to cluster-admin
-  create_kubernetes_resources = true
-  kubernetes_config_map_roles = [
-    {
-      rolearn  = aws_iam_role.gha_deployer.arn
-      username = "gha-deployer"
-      groups   = ["system:masters"]
-    }
-  ]
+  enable_cluster_autoscaler     = true
+  enable_metrics_server         = true
+  enable_kube_prometheus_stack  = true
 }
