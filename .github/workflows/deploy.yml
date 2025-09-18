@@ -18,18 +18,23 @@ jobs:
       with:
         terraform_version: 1.5.0
 
+
+    - name: Ensure ECR repository exists
+      run: |
+       if ! aws ecr describe-repositories --repository-names devops-project-2-app; then
+        aws ecr create-repository --repository-name devops-project-2-app
+       else
+        echo "ECR repository already exists, skipping creation"
+       fi
+      env:
+       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+       AWS_DEFAULT_REGION: eu-central-1
+
+
     - name: Terraform Init
       run: terraform init -upgrade
       working-directory: terraform
-
-    - name: Terraform Import ECR
-      run: terraform import aws_ecr_repository.app devops-project-2-app
-      working-directory: terraform
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        TF_VAR_github_owner: ${{ secrets.GH_OWNER }}
-        TF_VAR_github_repo: ${{ secrets.GH_NAME }}
 
     - name: Terraform Plan
       run: terraform plan
