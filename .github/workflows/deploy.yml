@@ -22,6 +22,10 @@ jobs:
       run: terraform init -upgrade
       working-directory: terraform
 
+    - name: Terraform Import ECR
+      run: terraform import aws_ecr_repository.app devops-project-2-app
+      working-directory: terraform
+
     - name: Terraform Plan
       run: terraform plan
       working-directory: terraform
