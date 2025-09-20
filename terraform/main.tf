@@ -44,7 +44,7 @@ module "eks" {
 
   # Let the module manage KMS
   manage_aws_kms_key = true
-  kms_key_alias       = "alias/eks/${var.project_name}-eks-1"
+  kms_key_aliases       = "alias/eks/${var.project_name}-eks-1"
 }
 
 # CloudWatch Log Group for EKS
