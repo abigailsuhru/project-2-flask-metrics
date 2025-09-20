@@ -28,29 +28,6 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: eu-central-1
 
-    - name: Import KMS Alias
-      if: ${{ env.SKIP_KMS_IMPORT != 'true' }}
-      run: |
-         terraform import -lock=false -input=false aws_kms_alias.cluster_alias arn:aws:kms:eu-central-1:${AWS_ACCOUNT_ID}:alias/eks/devops-project-2-eks || echo "Skipping import as alias does not exist"
-      working-directory: terraform
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: eu-central-1
-        TF_VAR_github_owner: ${{ secrets.GH_OWNER }}
-        TF_VAR_github_repo: ${{ secrets.GH_NAME }}
-
-    - name: Import CloudWatch Log Group
-      run: |
-         terraform import -lock=false -input=false aws_cloudwatch_log_group.eks_log_group /aws/eks/devops-project-2-eks/cluster || echo "Already imported"
-      working-directory: terraform
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: eu-central-1
-        TF_VAR_github_owner: ${{ secrets.GH_OWNER }}
-        TF_VAR_github_repo: ${{ secrets.GH_NAME }}
-
 
     - name: Terraform Plan
       run: terraform plan -out=tfplan
