@@ -33,34 +33,23 @@ module "eks" {
 
   eks_managed_node_groups = {
     default = {
-      min_size     = 1
-      max_size     = 3
-      desired_size = 2
+      min_size       = 1
+      max_size       = 3
+      desired_size   = 2
       instance_types = ["t3.medium"]
     }
   }
 
   enable_cluster_creator_admin_permissions = true
+
+  # Let the module manage KMS
+  manage_aws_kms_key = true
+  kms_key_alias       = "alias/eks/${var.project_name}-eks-1"
 }
 
-
-# KMS Key for EKS
-resource "aws_kms_key" "cluster" {
-  description             = "KMS key for EKS cluster"
-  enable_key_rotation     = true
-  deletion_window_in_days = 30
-}
-
-# KMS Alias for EKS
-resource "aws_kms_alias" "cluster_alias" {
-  name          = "alias/eks/devops-project-2-eks-new"
-  target_key_id = aws_kms_key.cluster.id
-}
-
-
-#  CloudWatch Log Group for EKS
+# CloudWatch Log Group for EKS
 resource "aws_cloudwatch_log_group" "eks_log_group" {
-  name              = "/aws/eks/devops-project-2-eks-new/cluster"
+  name              = "/aws/eks/${var.project_name}-eks-1/cluster"
   retention_in_days = 90
 }
 
@@ -70,7 +59,6 @@ resource "aws_iam_openid_connect_provider" "github" {
 
   client_id_list = ["sts.amazonaws.com"]
   thumbprint_list = [
-    # GitHub Actions OIDC root CA thumbprint
     "6938fd4d98bab03faadb97b34396831e3780aea1"
   ]
 }
@@ -140,7 +128,7 @@ resource "aws_iam_role_policy_attachment" "gha_attach" {
 # Map the IAM role into Kubernetes admins so helm/kubectl can deploy
 module "eks_blueprints_addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
-  version = "~> 1.16.0" # check latest on Terraform Registry
+  version = "~> 1.16.0"
 
   cluster_name        = module.eks.cluster_name
   cluster_endpoint    = module.eks.cluster_endpoint
