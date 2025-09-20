@@ -33,9 +33,10 @@ jobs:
 
     - name: Terraform Import Existing Resources
       run: |
+       terraform init -upgrade
        terraform import aws_ecr_repository.app devops-project-2-app || echo "Already imported"
        terraform import aws_iam_openid_connect_provider.github arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:oidc-provider/token.actions.githubusercontent.com || echo "Already imported"
-       terraform import aws_kms_alias.this arn:aws:kms: eu-central-1:${{ secrets.AWS_ACCOUNT_ID }}:alias/eks/${{ env.PROJECT_NAME }}-eks || echo "Already imported"
+       terraform import aws_kms_alias.this arn:aws:kms:eu-central-1:${{ secrets.AWS_ACCOUNT_ID }}:alias/eks/${{ env.PROJECT_NAME }}-eks || echo "Already imported"
        terraform import aws_cloudwatch_log_group.this "/aws/eks/${{ env.PROJECT_NAME }}-eks/cluster" || echo "Already imported"
       working-directory: terraform
       env:
@@ -44,10 +45,6 @@ jobs:
        AWS_DEFAULT_REGION:  eu-central-1
        PROJECT_NAME: devops-project-2
 
-
-    - name: Terraform Init
-      run: terraform init -upgrade
-      working-directory: terraform
 
     - name: Terraform Plan
       run: terraform plan
