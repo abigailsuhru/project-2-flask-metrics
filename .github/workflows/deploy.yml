@@ -40,17 +40,25 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: eu-central-1
 
-    - name: Terraform Import Static Resources
+    - name: Import ECR and IAM OIDC
       run: |
         terraform import aws_ecr_repository.app devops-project-2-app || echo "Already imported"
         terraform import aws_iam_openid_connect_provider.github arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:oidc-provider/token.actions.githubusercontent.com || echo "Already imported"
+      working-directory: terraform
+      env:
+       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+       AWS_DEFAULT_REGION: eu-central-1
+
+    - name: Import KMS and CloudWatch
+      run: |
         terraform import aws_kms_alias.this arn:aws:kms:eu-central-1:${{ secrets.AWS_ACCOUNT_ID }}:alias/eks/${{ env.PROJECT_NAME }}-eks || echo "Already imported"
         terraform import aws_cloudwatch_log_group.this "/aws/eks/${{ env.PROJECT_NAME }}-eks/cluster" || echo "Already imported"
       working-directory: terraform
       env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: eu-central-1
+       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+       AWS_DEFAULT_REGION: eu-central-1
 
     - name: Terraform Import EKS Cluster if exists
       run: |
