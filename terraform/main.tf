@@ -53,18 +53,18 @@ resource "aws_kms_key" "cluster" {
 
 # KMS Alias for EKS
 resource "aws_kms_alias" "cluster_alias" {
-  name          = "alias/eks/devops-project-2-eks-new"
+  name          = "alias/eks/devops-project-3-eks-new"
   target_key_id = aws_kms_key.cluster.id
 }
 
 resource "aws_kms_alias" "cluster_alias" {
-  name          = "alias/eks/devops-project-2-eks-new"
+  name          = "alias/eks/devops-project-4-eks-new"
   target_key_id = aws_kms_key.cluster.id
 }
 
 #  CloudWatch Log Group for EKS
 resource "aws_cloudwatch_log_group" "eks_log_group" {
-  name              = "/aws/eks/devops-project-2-eks-new/cluster"
+  name              = "/aws/eks/devops-project-5-eks-new/cluster"
   retention_in_days = 90
 }
 
