@@ -43,6 +43,13 @@ module "eks" {
   enable_cluster_creator_admin_permissions = true
 }
 
+# KMS Key for EKS
+resource "aws_kms_key" "cluster" {
+  description             = "KMS key for EKS cluster"
+  enable_key_rotation     = true
+  deletion_window_in_days = 30
+}
+
 # KMS Alias for EKS
 resource "aws_kms_alias" "cluster_alias" {
   name          = "alias/eks/devops-project-2-eks"
