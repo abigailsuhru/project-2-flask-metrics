@@ -1,4 +1,7 @@
 ```mermaid
+---
+title: Project 2 Architecture
+---
 flowchart TD
     A[Developer] -->|Push Code| B[GitHub Repository]
     B -->|Trigger CI/CD| C[GitHub Actions Workflow]
