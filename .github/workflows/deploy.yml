@@ -30,8 +30,8 @@ jobs:
 
     - name: Ensure ECR repository exists
       run: |
-        if ! aws ecr describe-repositories --repository-names devops-project-2-app; then
-          aws ecr create-repository --repository-name devops-project-2-app
+        if ! aws ecr describe-repositories --repository-names ${PROJECT_NAME}-app; then
+          aws ecr create-repository --repository-name ${PROJECT_NAME}-app
         else
           echo "ECR repository already exists, skipping creation"
         fi
@@ -39,43 +39,22 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: eu-central-1
-
-    - name: Add Terraform Stubs for Import
-      run: |
-        echo 'resource "aws_kms_alias" "this" {
-          name          = "alias/eks/${PROJECT_NAME}-eks"
-          target_key_id = "dummy"
-        }' >> terraform/stubs.tf
-
-        echo 'resource "aws_cloudwatch_log_group" "this" {
-          name = "/aws/eks/${PROJECT_NAME}-eks/cluster"
-        }' >> terraform/stubs.tf
-      shell: bash
-      env:
         PROJECT_NAME: devops-project-2
 
-
+    # ------------------------------------
+    # Step 1: Import static resources
+    # ------------------------------------
     - name: Import Static Resources
       run: |
         terraform import -lock=false -input=false \
           -var "github_owner=${{ secrets.GH_OWNER }}" \
           -var "github_repo=${{ secrets.GH_NAME }}" \
-          aws_ecr_repository.app devops-project-2-app || echo "Already imported"
+          aws_ecr_repository.app ${PROJECT_NAME}-app || echo "Already imported"
 
         terraform import -lock=false -input=false \
           -var "github_owner=${{ secrets.GH_OWNER }}" \
           -var "github_repo=${{ secrets.GH_NAME }}" \
           aws_iam_openid_connect_provider.github arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:oidc-provider/token.actions.githubusercontent.com || echo "Already imported"
-
-        terraform import -lock=false -input=false \
-          -var "github_owner=${{ secrets.GH_OWNER }}" \
-          -var "github_repo=${{ secrets.GH_NAME }}" \
-          aws_kms_alias.this arn:aws:kms:eu-central-1:${{ secrets.AWS_ACCOUNT_ID }}:alias/eks/${PROJECT_NAME}-eks || echo "Already imported"
-
-        terraform import -lock=false -input=false \
-          -var "github_owner=${{ secrets.GH_OWNER }}" \
-          -var "github_repo=${{ secrets.GH_NAME }}" \
-          aws_cloudwatch_log_group.this "/aws/eks/${PROJECT_NAME}-eks/cluster" || echo "Already imported"
       working-directory: terraform
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -83,47 +62,13 @@ jobs:
         AWS_DEFAULT_REGION: eu-central-1
         PROJECT_NAME: devops-project-2
 
-
-    - name: Terraform Import EKS Cluster if exists
-      run: |
-        set -e
-
-        if aws eks describe-cluster --name ${PROJECT_NAME}-eks; then
-          echo "EKS cluster exists, importing resources..."
-
-          terraform import module.eks.aws_eks_cluster.this ${PROJECT_NAME}-eks
-
-          NODE_GROUPS=$(aws eks list-nodegroups --cluster-name ${PROJECT_NAME}-eks --query 'nodegroups' --output text)
-          for ng in $NODE_GROUPS; do
-            terraform import module.eks.aws_eks_node_group.ng["$ng"] ${PROJECT_NAME}-eks:$ng
-          done
-        else
-          echo "No existing EKS cluster found, Terraform will create one"
-        fi
-      working-directory: terraform
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: eu-central-1
-        PROJECT_NAME: devops-project-2
-
-    - name: Terraform Plan
-      run: terraform plan
-      working-directory: terraform
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: eu-central-1
-        TF_VAR_github_owner: ${{ secrets.GH_OWNER }}
-        TF_VAR_github_repo: ${{ secrets.GH_NAME }}
-
-
+    # ------------------------------------
+    # Step 2: Apply static resources
+    # ------------------------------------
     - name: Terraform Apply Static Resources
       run: terraform apply -auto-approve \
         -target=aws_ecr_repository.app \
-        -target=aws_iam_openid_connect_provider.github \
-        -target=aws_kms_alias.this \
-        -target=aws_cloudwatch_log_group.this
+        -target=aws_iam_openid_connect_provider.github
       working-directory: terraform
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -132,8 +77,9 @@ jobs:
         TF_VAR_github_owner: ${{ secrets.GH_OWNER }}
         TF_VAR_github_repo: ${{ secrets.GH_NAME }}
 
-
-    # ✅ First, create the EKS cluster and node groups  
+    # ------------------------------------
+    # Step 3: Apply EKS cluster
+    # ------------------------------------
     - name: Terraform Apply EKS Cluster
       run: terraform apply -auto-approve -target=module.eks
       working-directory: terraform
@@ -144,7 +90,9 @@ jobs:
         TF_VAR_github_owner: ${{ secrets.GH_OWNER }}
         TF_VAR_github_repo: ${{ secrets.GH_NAME }}
 
-    # ✅ Only after EKS is created, run addons
+    # ------------------------------------
+    # Step 4: Apply EKS addons
+    # ------------------------------------
     - name: Terraform Apply EKS Addons
       run: terraform apply -auto-approve -target=module.eks_blueprints_addons
       working-directory: terraform
@@ -155,11 +103,26 @@ jobs:
         TF_VAR_github_owner: ${{ secrets.GH_OWNER }}
         TF_VAR_github_repo: ${{ secrets.GH_NAME }}
 
-    # ✅ Finally, deploy Helm-based components
+    # ------------------------------------
+    # Step 5: Apply Helm add-ons
+    # ------------------------------------
     - name: Terraform Apply Helm Add-ons
       run: terraform apply -auto-approve \
         -target=helm_release.kube_prometheus_stack \
         -target=helm_release.metrics_server
+      working-directory: terraform
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: eu-central-1
+        TF_VAR_github_owner: ${{ secrets.GH_OWNER }}
+        TF_VAR_github_repo: ${{ secrets.GH_NAME }}
+
+    # ------------------------------------
+    # Step 6: Final full apply
+    # ------------------------------------
+    - name: Terraform Final Apply
+      run: terraform apply -auto-approve
       working-directory: terraform
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
