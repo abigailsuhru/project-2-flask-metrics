@@ -29,6 +29,15 @@ jobs:
         AWS_DEFAULT_REGION: eu-central-1
 
 
+    - name: Import KMS Alias
+      run: |
+         terraform import -lock=false -input=false aws_kms_alias.cluster_alias arn:aws:kms:eu-central-1:${AWS_ACCOUNT_ID}:alias/eks/devops-project-2-eks || echo "Already imported"
+
+    - name: Import CloudWatch Log Group
+      run: |
+         terraform import -lock=false -input=false aws_cloudwatch_log_group.eks_log_group /aws/eks/devops-project-2-eks/cluster || echo "Already imported"
+
+
     - name: Terraform Plan
       run: terraform plan -out=tfplan
       working-directory: terraform
