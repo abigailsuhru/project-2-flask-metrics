@@ -57,11 +57,6 @@ resource "aws_kms_alias" "cluster_alias" {
   target_key_id = aws_kms_key.cluster.id
 }
 
-resource "aws_kms_alias" "cluster_alias" {
-  name          = "alias/eks/devops-project-4-eks-new"
-  target_key_id = aws_kms_key.cluster.id
-}
-
 #  CloudWatch Log Group for EKS
 resource "aws_cloudwatch_log_group" "eks_log_group" {
   name              = "/aws/eks/devops-project-5-eks-new/cluster"
