@@ -45,10 +45,18 @@ jobs:
 
     - name: Terraform Import Existing Resources
       run: |
-       terraform import aws_ecr_repository.app devops-project-2-app || echo "Already imported"
-       terraform import aws_iam_openid_connect_provider.github arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:oidc-provider/token.actions.githubusercontent.com || echo "Already imported"
-       terraform import aws_kms_alias.this arn:aws:kms:eu-central-1:${{ secrets.AWS_ACCOUNT_ID }}:alias/eks/${{ env.PROJECT_NAME }}-eks || echo "Already imported"
-       terraform import aws_cloudwatch_log_group.this "/aws/eks/${{ env.PROJECT_NAME }}-eks/cluster" || echo "Already imported"
+       terraform import -var "github_owner=${{ secrets.GH_OWNER }}" \
+                        -var "github_repo=${{ secrets.GH_NAME }}" \
+                        aws_ecr_repository.app devops-project-2-app || echo "Already imported"
+       terraform import -var "github_owner=${{ secrets.GH_OWNER }}" \
+                        -var "github_repo=${{ secrets.GH_NAME }}" \
+                        aws_iam_openid_connect_provider.github arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:oidc-provider/token.actions.githubusercontent.com || echo "Already imported"
+       terraform import -var "github_owner=${{ secrets.GH_OWNER }}" \
+                        -var "github_repo=${{ secrets.GH_NAME }}" \
+                        aws_kms_alias.this arn:aws:kms:eu-central-1:${{ secrets.AWS_ACCOUNT_ID }}:alias/eks/${{ env.PROJECT_NAME }}-eks || echo "Already imported"
+       terraform import -var "github_owner=${{ secrets.GH_OWNER }}" \
+                        -var "github_repo=${{ secrets.GH_NAME }}" \
+                        aws_cloudwatch_log_group.this "/aws/eks/${{ env.PROJECT_NAME }}-eks/cluster" || echo "Already imported"
       working-directory: terraform
       env:
        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
