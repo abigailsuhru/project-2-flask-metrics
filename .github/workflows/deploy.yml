@@ -40,47 +40,46 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: eu-central-1
 
-    - name: Import ECR and IAM OIDC
+    - name: Add Terraform Stubs for Import
+      run: |
+        echo 'resource "aws_kms_alias" "this" {
+          name          = "alias/eks/${PROJECT_NAME}-eks"
+          target_key_id = "dummy"
+        }' >> terraform/stubs.tf
+
+        echo 'resource "aws_cloudwatch_log_group" "this" {
+          name = "/aws/eks/${PROJECT_NAME}-eks/cluster"
+        }' >> terraform/stubs.tf
+      shell: bash
+      env:
+        PROJECT_NAME: devops-project-2
+
+    - name: Import Static Resources
       run: |
         terraform import -lock=false -input=false aws_ecr_repository.app devops-project-2-app || echo "Already imported"
         terraform import -lock=false -input=false aws_iam_openid_connect_provider.github arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:oidc-provider/token.actions.githubusercontent.com || echo "Already imported"
+        terraform import -lock=false -input=false aws_kms_alias.this arn:aws:kms:eu-central-1:${{ secrets.AWS_ACCOUNT_ID }}:alias/eks/${PROJECT_NAME}-eks || echo "Already imported"
+        terraform import -lock=false -input=false aws_cloudwatch_log_group.this "/aws/eks/${PROJECT_NAME}-eks/cluster" || echo "Already imported"
       working-directory: terraform
       env:
-       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-       AWS_DEFAULT_REGION: eu-central-1
-
-
-    - name: Import KMS and CloudWatch
-      run: |
-        terraform import aws_kms_alias.this arn:aws:kms:eu-central-1:${{ secrets.AWS_ACCOUNT_ID }}:alias/eks/${{ env.PROJECT_NAME }}-eks || echo "Already imported"
-        terraform import aws_cloudwatch_log_group.this "/aws/eks/${{ env.PROJECT_NAME }}-eks/cluster" || echo "Already imported"
-      working-directory: terraform
-      env:
-       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-       AWS_DEFAULT_REGION: eu-central-1
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: eu-central-1
+        PROJECT_NAME: devops-project-2
 
     - name: Terraform Import EKS Cluster if exists
       run: |
         set -e
 
-        # Check if EKS cluster exists
         if aws eks describe-cluster --name ${PROJECT_NAME}-eks; then
           echo "EKS cluster exists, importing resources..."
 
-          # Import the cluster itself
           terraform import module.eks.aws_eks_cluster.this ${PROJECT_NAME}-eks
 
-          # Import all managed node groups
           NODE_GROUPS=$(aws eks list-nodegroups --cluster-name ${PROJECT_NAME}-eks --query 'nodegroups' --output text)
           for ng in $NODE_GROUPS; do
             terraform import module.eks.aws_eks_node_group.ng["$ng"] ${PROJECT_NAME}-eks:$ng
           done
-
-          # Optionally import IAM roles/security groups if needed
-          # terraform import module.eks.aws_iam_role.cluster_role <role_arn>
-          # terraform import module.eks.aws_security_group.node <sg_id>
         else
           echo "No existing EKS cluster found, Terraform will create one"
         fi
