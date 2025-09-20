@@ -39,10 +39,11 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: eu-central-1
-        PROJECT_NAME: devops-project-2
+
+
 
     # ------------------------------------
-    # Step 1: Import static resources
+    # Phase 1: Static resources
     # ------------------------------------
     - name: Import Static Resources
       run: |
@@ -60,11 +61,7 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_DEFAULT_REGION: eu-central-1
-        PROJECT_NAME: devops-project-2
 
-    # ------------------------------------
-    # Step 2: Apply static resources
-    # ------------------------------------
     - name: Terraform Apply Static Resources
       run: terraform apply -auto-approve \
         -target=aws_ecr_repository.app \
@@ -77,8 +74,9 @@ jobs:
         TF_VAR_github_owner: ${{ secrets.GH_OWNER }}
         TF_VAR_github_repo: ${{ secrets.GH_NAME }}
 
+
     # ------------------------------------
-    # Step 3: Apply EKS cluster
+    # Phase 2: EKS cluster
     # ------------------------------------
     - name: Terraform Apply EKS Cluster
       run: terraform apply -auto-approve -target=module.eks
@@ -91,7 +89,7 @@ jobs:
         TF_VAR_github_repo: ${{ secrets.GH_NAME }}
 
     # ------------------------------------
-    # Step 4: Apply EKS addons
+    # Phase 3: Addons (kubernetes + helm)
     # ------------------------------------
     - name: Terraform Apply EKS Addons
       run: terraform apply -auto-approve -target=module.eks_blueprints_addons
@@ -103,14 +101,10 @@ jobs:
         TF_VAR_github_owner: ${{ secrets.GH_OWNER }}
         TF_VAR_github_repo: ${{ secrets.GH_NAME }}
 
-    # ------------------------------------
-    # Step 5: Apply Helm add-ons
-    # ------------------------------------
     - name: Terraform Apply Helm Add-ons
       run: terraform apply -auto-approve \
-        -target=aws_ecr_repository.app \
-        -target=aws_iam_openid_connect_provider.github \
-        -target=aws_kms_key.this
+        -target=helm_release.kube_prometheus_stack \
+        -target=helm_release.metrics_server
       working-directory: terraform
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -120,7 +114,7 @@ jobs:
         TF_VAR_github_repo: ${{ secrets.GH_NAME }}
 
     # ------------------------------------
-    # Step 6: Final full apply
+    # Final Apply
     # ------------------------------------
     - name: Terraform Final Apply
       run: terraform apply -auto-approve
