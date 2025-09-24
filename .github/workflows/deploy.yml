@@ -30,6 +30,11 @@ jobs:
         echo "${KUBECONFIG}" > kubeconfig
         export KUBECONFIG=kubeconfig
 
+    - name: Debug Kubeconfig
+      run: |
+        cat kubeconfig
+
+
     - name: Terraform Init
       run: terraform init
       working-directory: terraform
