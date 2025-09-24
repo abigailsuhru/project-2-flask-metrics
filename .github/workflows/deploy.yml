@@ -39,6 +39,8 @@ jobs:
         TF_VAR_namespace: "default"
         TF_VAR_image_repository: "myapp-image-repo"
         TF_VAR_image_tag: "latest"
+        TF_VAR_github_owner: ${{ secrets.GH_OWNER }}
+        TF_VAR_github_repo: ${{ secrets.GH_NAME }}
       run: terraform plan -out=tfplan
       working-directory: terraform
 
@@ -47,5 +49,7 @@ jobs:
         TF_VAR_namespace: "default"
         TF_VAR_image_repository: "myapp-image-repo"
         TF_VAR_image_tag: "latest"
+        TF_VAR_github_owner: ${{ secrets.GH_OWNER }}
+        TF_VAR_github_repo: ${{ secrets.GH_NAME }}
       run: terraform apply -auto-approve
       working-directory: terraform
