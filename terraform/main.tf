@@ -1,7 +1,3 @@
-provider "kubernetes" {}
-
-provider "helm" {}
-
 # Deploy the Helm chart for your app
 resource "helm_release" "myapp" {
   name       = "myapp"
