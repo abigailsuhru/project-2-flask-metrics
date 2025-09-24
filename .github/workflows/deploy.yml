@@ -37,8 +37,11 @@ jobs:
     - name: Terraform Plan
       run: terraform plan -out=tfplan
       working-directory: terraform
+      TF_VAR_github_owner: ${{ secrets.GH_OWNER }}
+      TF_VAR_github_repo: ${{ secrets.GH_NAME }}
 
     - name: Terraform Apply
       run: terraform apply -auto-approve
       working-directory: terraform
-      
+      TF_VAR_github_owner: ${{ secrets.GH_OWNER }}
+      TF_VAR_github_repo: ${{ secrets.GH_NAME }}
