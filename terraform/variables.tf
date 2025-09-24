@@ -1,12 +1,16 @@
-variable "region" {
-  type    = string
-  default = "eu-central-1"
+variable "namespace" {
+  description = "The Kubernetes namespace to deploy the app"
+  type        = string
+  default     = "default"
 }
 
-variable "project_name" {
-  type    = string
-  default = "devops-project-2"
+variable "image_repository" {
+  description = "The Docker image repository for the app"
+  type        = string
 }
 
-variable "github_owner" { type = string }
-variable "github_repo"  { type = string }
+variable "image_tag" {
+  description = "The Docker image tag for the app"
+  type        = string
+  default     = "latest"
+}
