@@ -4,4 +4,13 @@ kind: ServiceMonitor
 metadata:
   name: myapp
   labels:
-    release: kube-pr
+    release: kube-prometheus
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+{{- end }}

@@ -25,3 +25,7 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+prometheus:
+  servicemonitor:
+    enabled: true
