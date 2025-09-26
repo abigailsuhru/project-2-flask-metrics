@@ -1,3 +1,6 @@
+app:
+  name: my1app-v2
+
 replicaCount: 1
 
 image:
