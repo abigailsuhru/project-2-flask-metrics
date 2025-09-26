@@ -12,12 +12,8 @@ terraform {
   }
 }
 
-provider "kubernetes" {
-  config_path = "${path.module}/../kubeconfig"
-}
+# Configure Kubernetes provider using KUBECONFIG
+provider "kubernetes" {}
 
-provider "helm" {
-  kubernetes {
-    config_path = "${path.module}/../kubeconfig"
-  }
-}
+# Configure Helm provider using KUBECONFIG
+provider "helm" {}
