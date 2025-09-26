@@ -1,8 +1,8 @@
-resource "helm_release" "myapp" {
-  name      = "myapp"
+resource "helm_release" "my1app" {
+  name      = "my1app"
   namespace = var.namespace
-  chart     = "../helm/myapp"
-  values    = [file("${path.module}/../helm/myapp/values.yaml")]
+  chart     = "../helm/my1app"
+  values    = [file("${path.module}/../helm/my1app/values.yaml")]
 
   set {
     name  = "image.repository"

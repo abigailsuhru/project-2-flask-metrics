@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: myapp-image-repo
+  repository: my1app-image-repo
   tag: latest
   pullPolicy: IfNotPresent
 
