@@ -3,7 +3,7 @@ resource "helm_release" "my1app" {
   namespace = var.namespace
   chart     = "../helm/myapp"
   wait      = false
-  
+
   values = [
     file("${path.module}/../helm/myapp/values.yaml")
   ]
@@ -17,4 +17,7 @@ resource "helm_release" "my1app" {
     name  = "image.tag"
     value = var.image_tag
   }
+
+  force_update = true
+
 }
