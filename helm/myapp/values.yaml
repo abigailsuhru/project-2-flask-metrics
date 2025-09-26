@@ -3,6 +3,7 @@ app:
 
 replicaCount: 1
 
+
 image:
   repository: "" # Will be overridden by Terraform
   tag: ""        # Will be overridden by Terraform
