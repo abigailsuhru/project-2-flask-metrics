@@ -1,13 +1,3 @@
-provider "kubernetes" {
-  config_path = "~/.kube/config"
-}
-
-provider "helm" {
-  kubernetes {
-    config_path = "~/.kube/config"
-  }
-}
-
 resource "kubernetes_namespace" "my_ns" {
   metadata {
     name = var.namespace

@@ -12,8 +12,12 @@ terraform {
   }
 }
 
-# Configure Kubernetes provider using KUBECONFIG
-provider "kubernetes" {}
+provider "kubernetes" {
+  config_path = "~/.kube/config"
+}
 
-# Configure Helm provider using KUBECONFIG
-provider "helm" {}
+provider "helm" {
+  kubernetes {
+    config_path = "~/.kube/config"
+  }
+}
