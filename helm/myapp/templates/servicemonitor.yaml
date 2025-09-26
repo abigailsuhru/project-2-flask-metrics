@@ -2,13 +2,13 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: my1app
+  name: {{ .Release.Name }}
   labels:
     release: kube-prometheus
 spec:
   selector:
     matchLabels:
-      app: my1app
+      app: {{ .Release.Name }}
   endpoints:
     - port: http
       path: /metrics

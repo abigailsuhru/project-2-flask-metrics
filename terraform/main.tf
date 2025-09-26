@@ -1,5 +1,5 @@
 resource "helm_release" "my1app" {
-  name      = "my1app"
+  name      = "my1app-v1"
   namespace = var.namespace
   chart     = "../helm/myapp"
   values    = [file("${path.module}/../helm/myapp/values.yaml")]
