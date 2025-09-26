@@ -1,9 +1,8 @@
 resource "helm_release" "myapp" {
-  name       = "myapp"
-  namespace  = kubernetes_namespace.my_ns.metadata[0].name
-  chart      = "../helm/myapp"
-  values     = [file("${path.module}/../helm/myapp/values.yaml")]
-  namespace  = var.namespace
+  name      = "myapp"
+  namespace = var.namespace
+  chart     = "../helm/myapp"
+  values    = [file("${path.module}/../helm/myapp/values.yaml")]
 
   set {
     name  = "image.repository"
@@ -14,6 +13,4 @@ resource "helm_release" "myapp" {
     name  = "image.tag"
     value = var.image_tag
   }
-
-  depends_on = [kubernetes_namespace.my_ns]
 }
