@@ -37,7 +37,6 @@ jobs:
         aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws configure set default.region ${{ secrets.AWS_DEFAULT_REGION }}
 
-
     - name: Terraform Init
       run: terraform init
       working-directory: terraform
@@ -45,7 +44,7 @@ jobs:
     - name: Terraform Plan
       env:
         TF_VAR_namespace: "default"
-        TF_VAR_image_repository: "myapp-image-repo"
+        TF_VAR_image_repository: "507363615947.dkr.ecr.eu-central-1.amazonaws.com/myapp-image"
         TF_VAR_image_tag: "latest"
         TF_VAR_github_owner: ${{ secrets.GH_OWNER }}
         TF_VAR_github_repo: ${{ secrets.GH_NAME }}
@@ -55,7 +54,7 @@ jobs:
     - name: Terraform Apply
       env:
         TF_VAR_namespace: "default"
-        TF_VAR_image_repository: "myapp-image-repo"
+        TF_VAR_image_repository: "507363615947.dkr.ecr.eu-central-1.amazonaws.com/myapp-image"
         TF_VAR_image_tag: "latest"
         TF_VAR_github_owner: ${{ secrets.GH_OWNER }}
         TF_VAR_github_repo: ${{ secrets.GH_NAME }}

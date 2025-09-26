@@ -1,8 +1,8 @@
 replicaCount: 1
 
 image:
-  repository: 507363615947.dkr.ecr.eu-central-1.amazonaws.com/myapp-image
-  tag: latest
+  repository: "" # Will be overridden by Terraform
+  tag: ""        # Will be overridden by Terraform
   pullPolicy: IfNotPresent
 
 service:
@@ -16,7 +16,6 @@ resources:
   requests:
     cpu: 250m
     memory: 256Mi
-
 
 autoscaling:
   enabled: false

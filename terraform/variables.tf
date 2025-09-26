@@ -1,16 +1,17 @@
-variable "namespace" {
-  description = "The Kubernetes namespace to deploy the app"
-  type        = string
-  default     = "default"
-}
-
 variable "image_repository" {
-  description = "The Docker image repository for the app"
+  description = "Full ECR repository URL"
   type        = string
+  default     = "507363615947.dkr.ecr.eu-central-1.amazonaws.com/myapp-image"
 }
 
 variable "image_tag" {
-  description = "The Docker image tag for the app"
+  description = "Docker image tag"
   type        = string
   default     = "latest"
+}
+
+variable "namespace" {
+  description = "Kubernetes namespace"
+  type        = string
+  default     = "default"
 }
